@@ -1,0 +1,7 @@
+# folders
+node_modules
+src/etc/secrets
+
+# files
+.env
+package-lock.json
