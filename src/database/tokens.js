@@ -1,6 +1,5 @@
 require("dotenv").config();
 const { ObjectId } = require("mongodb");
-const { isJSON } = require("../utils/json");
 const {
   getDB,
   insertData,
@@ -9,55 +8,73 @@ const {
   getDocumentById,
   updateData,
   listRecordForAttribute,
-} = require("./mdb-basics");
+} = require("./basics");
 const { encrypt, decrypt, fromHexToBytes } = require("../utils/string");
-const { encryptTokenData, decryptTokenData } = require("./utils/token-data");
+const { Token } = require("../classes/token");
+const { authenticate } = require("../g-drive/default/authenticate");
+const {
+  verifyCredentialsAndGetRemainingSpace,
+} = require("../g-drive/verify-json-credentials");
+const { sha256Hash } = require("../utils/hash");
 
-getTokenIfExists = async ({ db, objectId }) => {
-  if (typeof objectId !== "string" || objectId.length !== 24) return false;
+getTokenIfExists = async ({ db, sha256 }) => {
+  if (typeof sha256 !== "string" || sha256.length !== 64) {
+    return false;
+  }
 
-  const tokenFile = await getDocumentById(
+  const tokenFile = await listRecordForAttribute(
     db,
     process.env.COLLECTION_TOKENS,
-    objectId
+    {
+      fields: ["_id", "sha256"],
+      filters: [{ sha256 }],
+      limit: 1,
+    }
   );
   return tokenFile;
 };
 
 module.exports = {
-  encryptAndInsertToken: async ({ tokenData, objectId }) => {
+  encryptAndInsertToken: async ({ credentials }) => {
     const client = await createConnection();
     const db = await getDB(client, process.env.DB_NAME);
 
-    const expiration_date = new Date();
-    expiration_date.setDate(expiration_date.getDate() + 59);
+    const sha256 = sha256Hash(credentials);
 
-    const encryptedTokenData = encrypt(
-      tokenData,
-      fromHexToBytes(process.env.ENC_SECRET_KEY)
+    const isTokenPresent = await getTokenIfExists({ db, sha256 });
+
+    if (isTokenPresent) {
+      console.log("Credentials provided already stored in DB.");
+      return;
+    }
+
+    const remaining_space = await verifyCredentialsAndGetRemainingSpace(
+      credentials
     );
 
-    encryptedTokenData.expiration_date;
+    if (remaining_space) {
+      const encryptedCredentials = encrypt(
+        JSON.stringify(credentials),
+        fromHexToBytes(process.env.ENC_SECRET_KEY)
+      );
 
-    const isTokenPresent = await getTokenIfExists({ db, objectId });
+      const token = new Token({
+        sha256,
+        credentials: encryptedCredentials,
+        available_space: remaining_space,
+      });
 
-    try {
-      const insertedData = isTokenPresent
-        ? await updateData(
-            db,
-            process.env.COLLECTION_TOKENS,
-            objectId,
-            encryptedTokenData
-          )
-        : await insertData(
-            db,
-            process.env.COLLECTION_TOKENS,
-            encryptedTokenData
-          );
+      try {
+        const insertedData = await insertData(
+          db,
+          process.env.COLLECTION_TOKENS,
+          token
+        );
 
-      return { insertedData };
-    } finally {
-      await closeConnection(client);
+        return { insertedData };
+      } finally {
+        await closeConnection(client);
+      }
     }
   },
 
@@ -76,46 +93,19 @@ module.exports = {
     }
   },
 
-  getTokenDataFromId: async ({ objectId }) => {
-    const client = await createConnection();
-    const db = await getDB(client, process.env.DB_NAME);
+  //   getTokenDataFromId: async ({ objectId }) => {
+  //     const client = await createConnection();
+  //     const db = await getDB(client, process.env.DB_NAME);
 
-    const tokenData = await getDocumentById(
-      db,
-      process.env.COLLECTION_TOKENS,
-      objectId
-    );
+  //     const tokenData = await getDocumentById(
+  //       db,
+  //       process.env.COLLECTION_TOKENS,
+  //       objectId
+  //     );
 
-    /*
-     * if tokenData found, decrypting it and returning its access token
-     */
-    return tokenData ? decryptTokenData(tokenData) : null;
-  },
-
-  searchTokenByIgId: async ({ igId }) => {
-    const client = await createConnection();
-    const db = await getDB(client, process.env.DB_NAME);
-
-    const tokenData = await listRecordForAttribute(
-      db,
-      process.env.COLLECTION_TOKENS,
-      {
-        fields: ["_id", "ig_id"],
-      }
-    );
-
-    if (!tokenData) return null;
-
-    const tokenId = tokenData.map((user) => {
-      const decryptedTokenData = decryptTokenData(user);
-      if (decryptedTokenData.ig_id === igId)
-        return String(decryptedTokenData._id);
-    })[0];
-
-    /*
-     * returning the tokenId of the token
-     * matching with the igId provided, otherwise null
-     */
-    return tokenId;
-  },
+  //     /*
+  //      * if tokenData found, decrypting it and returning its access token
+  //      */
+  //     return tokenData ? decryptTokenData(tokenData) : null;
+  //   },
 };

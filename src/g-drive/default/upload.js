@@ -1,6 +1,6 @@
 const { google } = require("googleapis");
-const { createReadStream } = require("../utils/read-stream");
-const { getMimeType, getBasicProps } = require("../utils/files");
+const { createReadStream } = require("../../utils/read-stream");
+const { getMimeType, getBasicProps } = require("../../utils/files");
 
 module.exports = {
   uploadFile: async ({

@@ -1,8 +1,13 @@
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
+createDB = async (client, db_name) => {
+  const new_db = await client.db(db_name);
+  return new_db;
+};
+
 module.exports = {
-  createConnection: (createConnection = async () => {
+  createConnection: async () => {
     try {
       const client = new MongoClient(process.env.MONGODB_URI, {
         serverApi: {
@@ -20,14 +25,14 @@ module.exports = {
     } catch (e) {
       console.log(e);
     }
-  }),
+  },
 
-  closeConnection: (closeConnection = async (client) => {
+  closeConnection: async (client) => {
     await client.close();
     console.log("Connection closed");
-  }),
+  },
 
-  getDB: (getDB = async (client, db_name) => {
+  getDB: async (client, db_name) => {
     const databases = await client.db().admin().listDatabases();
 
     const databaseExists = databases.databases.some(
@@ -35,19 +40,25 @@ module.exports = {
     );
 
     if (databaseExists) return client.db(db_name);
-    else console.log(`The database '${db_name}' does not exists.`);
-  }),
+    else {
+      console.log(
+        `The database '${db_name}' does not exists, creating it now...`
+      );
+      const new_db = await createDB(client, db_name);
+      return new_db;
+    }
+  },
 
-  addCollection: (addCollection = async (db, collection_name) => {
+  addCollection: async (db, collection_name) => {
     try {
       await db.createCollection(collection_name);
       console.log("Collection created successfully.");
     } catch (err) {
       console.error(err);
     }
-  }),
+  },
 
-  listAllCollections: (listAllCollections = async (db) => {
+  listAllCollections: async (db) => {
     try {
       const collections = [];
       const cursor = db.listCollections();
@@ -60,9 +71,9 @@ module.exports = {
     } catch (err) {
       console.error(err);
     }
-  }),
+  },
 
-  insertData: (insertData = async (db, cl, data) => {
+  insertData: async (db, cl, data) => {
     try {
       const collection = db.collection(cl);
 
@@ -85,7 +96,7 @@ module.exports = {
         console.error("Error occurred while inserting data:", err);
       }
     }
-  }),
+  },
 
   updateData: async (db, cl, objectId, data) => {
     try {
@@ -105,6 +116,8 @@ module.exports = {
   },
 
   countObjectInCollection: (countObjectInCollection = async (db, cl) => {
+    if (!db) return 0;
+
     const collection = db.collection(cl);
 
     const count = await collection.countDocuments({});

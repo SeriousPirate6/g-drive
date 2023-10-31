@@ -1,5 +1,5 @@
-const { nameToFileId } = require("../g-drive/properties");
-const { authenticate } = require("../g-drive/authenticate");
+const { nameToFileId } = require("../g-drive/default/properties");
+const { authenticate } = require("../g-drive/default/authenticate");
 
 module.exports = {
   nameToFileId: async (req, res) => {
