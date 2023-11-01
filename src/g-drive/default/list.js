@@ -3,9 +3,9 @@ const { google } = require("googleapis");
 module.exports = {
   getAllIdsWithToken: async ({
     auth,
-    query = false,
-    fields = false,
-    orderBy = false,
+    query,
+    fields,
+    orderBy,
     print = true,
   }) => {
     const drive = google.drive({ version: "v3", auth });

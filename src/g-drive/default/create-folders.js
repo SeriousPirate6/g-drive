@@ -10,7 +10,7 @@ module.exports = {
       return;
     }
 
-    const folderId = await nameToFolderId({ folderName });
+    const folderId = await nameToFolderId({ auth, folderName });
     if (folderId) {
       console.log(`The folder ${folderName} already exists.`);
       return folderId;
@@ -18,7 +18,7 @@ module.exports = {
 
     const folderMetaData = {
       name: folderName,
-      parents: [parentId ? parentId : process.env.DRIVE_AI_IMAGES_FOLDER],
+      parents: [parentId ? parentId : process.env.ROOT_FOLDER_ID],
       mimeType: "application/vnd.google-apps.folder",
     };
 
