@@ -6,7 +6,7 @@ module.exports = {
     query,
     fields,
     orderBy,
-    print = true,
+    print = false,
   }) => {
     const drive = google.drive({ version: "v3", auth });
     let foldersList = [];

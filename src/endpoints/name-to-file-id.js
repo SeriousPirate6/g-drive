@@ -2,11 +2,9 @@ const { nameToFileId } = require("../g-drive/default/properties");
 const { authenticate } = require("../g-drive/default/authenticate");
 
 module.exports = {
-  nameToFileId: async (req, res) => {
+  nameToFileIdEndpoint: async (req, res) => {
     try {
-      const fileName = req.query.fileId;
-      const folder = req.query.isFolder;
-      const contains = req.query.contains;
+      const { fileName, folder, contains } = req.query;
 
       if (fileName) {
         const auth = await authenticate();

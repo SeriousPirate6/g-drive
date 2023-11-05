@@ -1,5 +1,5 @@
 module.exports = {
-  sendSuccessResponse: (res, message) => {
-    res.send({ status: "success", message });
+  sendSuccessResponse: (res, message, data) => {
+    res.send({ status: "success", message, data });
   },
 };

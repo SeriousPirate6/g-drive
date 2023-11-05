@@ -18,11 +18,11 @@ delItem = async ({ auth, fileId }) => {
 };
 
 module.exports = {
-  deleteItems: async ({ ids }) => {
+  deleteItems: async ({ auth, ids }) => {
     if (!Array.isArray(ids)) ids = [ids];
 
     for await (const fileId of ids) {
-      await delItem({ fileId });
+      await delItem({ auth, fileId });
     }
   },
 };

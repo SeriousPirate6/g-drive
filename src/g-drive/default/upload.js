@@ -3,31 +3,23 @@ const { createReadStream } = require("../../utils/read-stream");
 const { getMimeType, getBasicProps } = require("../../utils/files");
 
 module.exports = {
-  uploadFile: async ({
-    auth,
-    filePath,
-    description,
-    file_props,
-    parentFolder = null,
-  }) => {
+  uploadFile: async ({ auth, path, description, properties, parent }) => {
     const driveService = google.drive({ version: "v3", auth });
 
-    const { fileName, fileExtension } = getBasicProps(filePath);
+    const { fileName, fileExtension } = getBasicProps(path);
 
     const fileMetaData = {
       name: `${fileName}.${fileExtension}`,
-      parents: [
-        parentFolder ? parentFolder : process.env.DRIVE_AI_IMAGES_FOLDER,
-      ],
+      parents: [parent ? parent : process.env.ROOT_FOLDER_ID],
       description,
-      properties: file_props,
+      properties: properties,
     };
 
     try {
-      const body = await createReadStream(filePath);
+      const body = await createReadStream(path);
 
       const media = {
-        mimeType: getMimeType(filePath),
+        mimeType: getMimeType(path),
         body,
       };
 

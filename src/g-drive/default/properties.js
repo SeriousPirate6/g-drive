@@ -43,7 +43,7 @@ module.exports = {
     });
   },
 
-  getPropsFromFile: async ({ auth, fileId, fields = null }) => {
+  getPropsFromFile: async ({ auth, fileId, fields }) => {
     const drive = google.drive({ version: "v3", auth });
     const file = await drive.files.get({
       fileId: fileId,
