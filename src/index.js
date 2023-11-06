@@ -16,6 +16,12 @@ const { updateParentIdEndpoint } = require("./endpoints/update-parent-id");
 const {
   updateSharePermissionsEndpoint,
 } = require("./endpoints/update-share-permissions");
+const { uploadEnvVarsEndpoint } = require("./endpoints/upload-env-vars");
+const { getFirstTokenAvailable } = require("./database/tokens");
+const { writeJSON } = require("./utils/json");
+const {
+  addNewCredentialsEndpoint,
+} = require("./endpoints/add-new-credentials");
 
 const port = 3000;
 const app = express();
@@ -39,6 +45,8 @@ app.get("/listAllFiles", listAllFilesEndpoint);
 
 /* POST */
 
+app.post("/addNewCredentials", addNewCredentialsEndpoint);
+
 app.post("/createFolder", createFolderEndpoint);
 
 app.post("/upload", uploadFileEndpoint);
@@ -49,6 +57,8 @@ app.patch("/parentId", updateParentIdEndpoint);
 
 app.patch("/sharePermissions/:id", updateSharePermissionsEndpoint);
 
+app.patch("/pushEnvVarsToRender", uploadEnvVarsEndpoint);
+
 /* DELETE */
 
 app.delete("/:id", deleteFileEndpoint);
@@ -56,6 +66,10 @@ app.delete("/:id", deleteFileEndpoint);
 app.delete("/files", deleteFileEndpoint);
 
 (async () => {
+  const driveCredentials = await getFirstTokenAvailable();
+
+  await writeJSON(driveCredentials, process.env.GDRIVE_KEY_FILE);
+
   const auth = await authenticate();
   await remainingSpace({ auth, print: true });
 })();

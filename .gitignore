@@ -5,3 +5,6 @@ src/etc/secrets
 # files
 .env
 package-lock.json
+
+# render env backup file
+render/env.json

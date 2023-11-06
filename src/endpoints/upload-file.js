@@ -1,3 +1,4 @@
+const fs = require("fs");
 const {
   sendBadRequest,
   sendInternalServerError,
@@ -5,9 +6,11 @@ const {
 const { uploadFile } = require("../g-drive/default/upload");
 const { authenticate } = require("../g-drive/default/authenticate");
 const { sendSuccessResponse } = require("../responses/success");
+const { getTokenIdByHash } = require("../database/tokens");
 
 module.exports = {
   uploadFileEndpoint: async (req, res) => {
+    /* TODO update the remaining space after each successfully upload */
     const file = req.body.file;
 
     if (file) {
@@ -17,13 +20,20 @@ module.exports = {
         try {
           const auth = await authenticate();
 
-          const fileId = await uploadFile({
-            auth,
-            path,
-            description,
-            properties,
-            parent,
-          });
+          /* TESTING PHASE */
+          const fileId = null;
+          // const fileId = await uploadFile({
+          //   auth,
+          //   path,
+          //   description,
+          //   properties,
+          //   parent,
+          // });
+
+          const credentials = JSON.parse(
+            fs.readFileSync(process.env.GDRIVE_KEY_FILE).toString()
+          );
+          const tokenId = await getTokenIdByHash({ credentials });
 
           sendSuccessResponse(res, `File uploaded successfully`, { fileId });
         } catch (error) {

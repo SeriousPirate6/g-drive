@@ -5,7 +5,9 @@ const getDirName = require("path").dirname;
 module.exports = {
   isJSON: (isJSON = (string) => {
     try {
-      JSON.parse(string);
+      typeof string === "object"
+        ? JSON.parse(JSON.stringify(string))
+        : JSON.parse(string);
     } catch (e) {
       return false;
     }

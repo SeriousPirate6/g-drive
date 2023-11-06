@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { isJSON } = require("./json");
 
 module.exports = {
   getRandomBytes: (keyLength) => {

@@ -1,12 +1,9 @@
 require("dotenv").config();
-const { ObjectId } = require("mongodb");
 const {
   getDB,
   insertData,
   closeConnection,
   createConnection,
-  getDocumentById,
-  updateData,
   listRecordForAttribute,
 } = require("./basics");
 const { encrypt, decrypt, fromHexToBytes } = require("../utils/string");
@@ -16,22 +13,18 @@ const {
   verifyCredentialsAndGetRemainingSpace,
 } = require("../g-drive/verify-json-credentials");
 const { sha256Hash } = require("../utils/hash");
+const { operators } = require("../constants/properties");
 
 getTokenIfExists = async ({ db, sha256 }) => {
   if (typeof sha256 !== "string" || sha256.length !== 64) {
     return false;
   }
 
-  const tokenFile = await listRecordForAttribute(
-    db,
-    process.env.COLLECTION_TOKENS,
-    {
-      fields: ["_id", "sha256"],
-      filters: [{ sha256 }],
-      limit: 1,
-    }
-  );
-  return tokenFile;
+  return await listRecordForAttribute(db, process.env.COLLECTION_TOKENS, {
+    fields: ["_id", "sha256"],
+    filters: [{ sha256 }],
+    limit: 1,
+  });
 };
 
 module.exports = {
@@ -54,7 +47,7 @@ module.exports = {
 
     if (remaining_space) {
       const encryptedCredentials = encrypt(
-        JSON.stringify(credentials),
+        credentials,
         fromHexToBytes(process.env.ENC_SECRET_KEY)
       );
 
@@ -78,34 +71,40 @@ module.exports = {
     }
   },
 
-  decryptAndGetToken: async ({ objectId }) => {
+  getTokenIdByHash: async ({ credentials }) => {
     const client = await createConnection();
     const db = await getDB(client, process.env.DB_NAME);
-    const tokenData = await getTokenIfExists({ db, objectId });
 
-    if (tokenData) {
-      const decryptedTokenData = decrypt(
-        tokenData,
-        fromHexToBytes(process.env.ENC_SECRET_KEY)
-      );
+    const sha256 = sha256Hash(credentials);
 
-      return decryptedTokenData;
-    }
+    const token = await listRecordForAttribute(
+      db,
+      process.env.COLLECTION_TOKENS,
+      { filters: [{ sha256: sha256 }], fields: "_id" }
+    );
+
+    return token.length > 0 ? token[0]._id.toString() : null;
   },
 
-  //   getTokenDataFromId: async ({ objectId }) => {
-  //     const client = await createConnection();
-  //     const db = await getDB(client, process.env.DB_NAME);
+  getFirstTokenAvailable: async (fileSize = 0.01) => {
+    const client = await createConnection();
+    const db = await getDB(client, process.env.DB_NAME);
 
-  //     const tokenData = await getDocumentById(
-  //       db,
-  //       process.env.COLLECTION_TOKENS,
-  //       objectId
-  //     );
+    const token = await listRecordForAttribute(
+      db,
+      process.env.COLLECTION_TOKENS,
+      {
+        filters: [{ available_space: fileSize, operator: operators.greater }],
+        limit: 1,
+      }
+    );
 
-  //     /*
-  //      * if tokenData found, decrypting it and returning its access token
-  //      */
-  //     return tokenData ? decryptTokenData(tokenData) : null;
-  //   },
+    if (!token[0]) return;
+
+    const credentials = token[0].credentials;
+
+    return decrypt(credentials, fromHexToBytes(process.env.ENC_SECRET_KEY));
+  },
+
+  updateTokenAvailableSpace: async ({ objectId }) => {},
 };

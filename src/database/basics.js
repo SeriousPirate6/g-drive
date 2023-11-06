@@ -2,8 +2,7 @@ require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 createDB = async (client, db_name) => {
-  const new_db = await client.db(db_name);
-  return new_db;
+  return await client.db(db_name);
 };
 
 module.exports = {
@@ -44,8 +43,7 @@ module.exports = {
       console.log(
         `The database '${db_name}' does not exists, creating it now...`
       );
-      const new_db = await createDB(client, db_name);
-      return new_db;
+      return await createDB(client, db_name);
     }
   },
 

@@ -5,4 +5,7 @@ module.exports = Object.freeze({
   /* share permissions type */
   GRANT: "grant",
   REVOKE: "revoke",
+
+  /* query operators */
+  operators: { greater: "$gt", lesser: "$lt", not_equal: "$ne" },
 });
