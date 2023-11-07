@@ -1,10 +1,11 @@
 const { google } = require("googleapis");
 const { createReadStream } = require("../../utils/read-stream");
 const { getMimeType, getBasicProps } = require("../../utils/files");
+const { DRIVE_API_VERSION } = require("../../constants/properties");
 
 module.exports = {
   uploadFile: async ({ auth, path, description, properties, parent }) => {
-    const driveService = google.drive({ version: "v3", auth });
+    const driveService = google.drive({ version: DRIVE_API_VERSION, auth });
 
     const { fileName, fileExtension } = getBasicProps(path);
 

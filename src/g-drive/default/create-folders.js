@@ -1,9 +1,10 @@
 const { google } = require("googleapis");
 const { nameToFolderId } = require("./properties");
+const { DRIVE_API_VERSION } = require("../../constants/properties");
 
 module.exports = {
   createFolder: async ({ auth, folderName, parentId = null }) => {
-    const driveService = google.drive({ version: "v3", auth });
+    const driveService = google.drive({ version: DRIVE_API_VERSION, auth });
 
     if (!folderName) {
       console.log(`Cannot create folder with null name.`);

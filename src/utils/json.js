@@ -2,23 +2,26 @@ const fs = require("fs");
 const path = require("path");
 const getDirName = require("path").dirname;
 
+isJSON = (string) => {
+  try {
+    typeof string === "object"
+      ? JSON.parse(JSON.stringify(string))
+      : JSON.parse(string);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
 module.exports = {
-  isJSON: (isJSON = (string) => {
-    try {
-      typeof string === "object"
-        ? JSON.parse(JSON.stringify(string))
-        : JSON.parse(string);
-    } catch (e) {
-      return false;
-    }
-    return true;
-  }),
+  isJSON,
 
   writeJSON: async (jsonFile, filePath) => {
     if (fs.existsSync(filePath)) {
-      if (isJSON(fs.readFileSync(filePath))) {
+      const file = fs.readFileSync(filePath);
+      if (isJSON(file)) {
         if (
-          JSON.stringify(JSON.parse(fs.readFileSync(filePath))) ===
+          JSON.stringify(JSON.parse(file.toString())) ===
           JSON.stringify(jsonFile)
         ) {
           return;

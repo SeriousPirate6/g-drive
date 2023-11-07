@@ -1,8 +1,9 @@
 const { google } = require("googleapis");
+const { DRIVE_API_VERSION } = require("../../constants/properties");
 
 module.exports = {
   remainingSpace: async ({ auth, print = false } = {}) => {
-    const drive = google.drive({ version: "v3", auth });
+    const drive = google.drive({ version: DRIVE_API_VERSION, auth });
     const about = await drive.about.get({ fields: "storageQuota" });
     const total_space = about.data.storageQuota.limit;
     const used_space = about.data.storageQuota.usage;

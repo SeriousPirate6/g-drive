@@ -1,17 +1,26 @@
-const { nameToFileId } = require("../g-drive/default/properties");
+const {
+  nameToFileId,
+  nameToFolderId,
+} = require("../g-drive/default/properties");
 const { authenticate } = require("../g-drive/default/authenticate");
 
 module.exports = {
   nameToFileIdEndpoint: async (req, res) => {
     try {
-      const { fileName, folder, contains } = req.query;
+      const { fileName, contains } = req.query;
 
       if (fileName) {
         const auth = await authenticate();
 
-        const name = nameToFileId({ auth, fileName, contains, folder });
+        /*
+         * checking if the url of the endpoint is from /files or /folders
+         * then, calling the correct function accordingly
+         */
+        const fileId = !req.url.toLowerCase().includes("folder")
+          ? await nameToFileId({ auth, fileName, contains })
+          : await nameToFolderId({ auth, folderName: fileName, contains });
 
-        res.send({ status: "success", name });
+        res.send({ status: "success", name: fileId });
       } else {
         res.status(400).send({
           status: "failed",

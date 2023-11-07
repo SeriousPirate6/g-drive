@@ -1,4 +1,5 @@
 const { google } = require("googleapis");
+const { DRIVE_API_VERSION } = require("../../constants/properties");
 
 module.exports = {
   getAllIdsWithToken: async ({
@@ -8,7 +9,7 @@ module.exports = {
     orderBy,
     print = false,
   }) => {
-    const drive = google.drive({ version: "v3", auth });
+    const drive = google.drive({ version: DRIVE_API_VERSION, auth });
     let foldersList = [];
     let pageToken = true;
     while (pageToken) {
@@ -33,7 +34,7 @@ module.exports = {
   },
 
   getFileById: async ({ auth, fileId }) => {
-    const drive = google.drive({ version: "v3", auth });
+    const drive = google.drive({ version: DRIVE_API_VERSION, auth });
     try {
       const file = await drive.files.get({
         fileId,

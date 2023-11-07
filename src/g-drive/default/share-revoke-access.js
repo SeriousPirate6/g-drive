@@ -1,8 +1,9 @@
 const { google } = require("googleapis");
+const { DRIVE_API_VERSION } = require("../../constants/properties");
 
 module.exports = {
   shareFile: async ({ auth, fileId }) => {
-    const driveService = google.drive({ version: "v3", auth });
+    const driveService = google.drive({ version: DRIVE_API_VERSION, auth });
 
     const permission = {
       type: "anyone",
@@ -24,7 +25,7 @@ module.exports = {
   },
 
   revokeSharePermission: async ({ auth, fileId, permissionId }) => {
-    const driveService = google.drive({ version: "v3", auth });
+    const driveService = google.drive({ version: DRIVE_API_VERSION, auth });
 
     try {
       const result = await driveService.permissions.delete({

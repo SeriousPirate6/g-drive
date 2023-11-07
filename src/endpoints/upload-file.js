@@ -8,43 +8,81 @@ const { sendSuccessResponse } = require("../responses/success");
 const {
   updateCredentialsAvailableSpace,
 } = require("../g-drive/update-credentials-available-space");
+const {
+  downloadFromBinary,
+  deleteFolderRecursively,
+} = require("../utils/files");
+const { TEMP_FOLDER } = require("../constants/properties");
+const { isJSON } = require("../utils/json");
 
 module.exports = {
   uploadFileEndpoint: async (req, res) => {
-    const file = req.body.file;
+    /* using multer to handle form-data body request */
+    const data = req.files[0];
+    const metadata = req.body;
 
-    if (file) {
+    if (data) {
       /* fetching parameters from body file object */
-      const { path, description, properties, parent } = file;
+      const { description, parent, properties } = metadata;
 
-      if (path) {
-        try {
-          /* performing authentication */
-          const auth = await authenticate();
+      /* converting string properties to actual JSON object */
+      const jsonProperties = isJSON(properties) ? JSON.parse(properties) : null;
 
-          /* uploading file */
-          const fileId = await uploadFile({
-            auth,
-            path,
-            description,
-            properties,
-            parent,
-          });
+      /*
+       * if properties are defined and parsable to JSON, go on with the request
+       * otherwise send bad request response
+       */
+      if (properties !== undefined && properties !== null) {
+        /* downloading binary file */
+        const path = await downloadFromBinary({
+          name: data.originalname,
+          mimeType: data.mimetype,
+          buffer: data.buffer,
+        });
 
-          /* updating the available space for the current set of credentials */
-          await updateCredentialsAvailableSpace({ auth });
+        /* proceeding only if the file has been downloaded properly */
+        if (path) {
+          try {
+            /* performing authentication */
+            const auth = await authenticate();
 
-          /* sending successful response */
-          sendSuccessResponse(res, `File uploaded successfully`, { fileId });
-        } catch (error) {
-          console.log(error);
-          sendInternalServerError(res);
+            /* uploading file */
+            const fileId = await uploadFile({
+              auth,
+              path,
+              description,
+              properties: jsonProperties,
+              parent,
+            });
+
+            /* updating the available space for the current set of credentials */
+            await updateCredentialsAvailableSpace({ auth });
+
+            /* deleting the temp folder and its content after the upload */
+            deleteFolderRecursively(TEMP_FOLDER);
+
+            /* sending successful response */
+            sendSuccessResponse(res, `File uploaded successfully`, { fileId });
+          } catch (error) {
+            console.log(error);
+
+            /* deleting the temp folder and its content in case of failed upload */
+            deleteFolderRecursively(TEMP_FOLDER);
+
+            /* sending internal server error response */
+            sendInternalServerError(res);
+          }
+        } else {
+          /* bad request response in case of file not convertible from binary */
+          sendBadRequest(res, "The file provided can't be read properly");
         }
       } else {
-        sendBadRequest(res, "The param 'path' is required");
+        /* bad request response in case of properties provided not in JSON format */
+        sendBadRequest(res, "The param 'properties' must be in JSON format");
       }
     } else {
-      sendBadRequest(res, "The param 'file' is required");
+      /* bad request response in case of binary file not provided */
+      sendBadRequest(res, "The binary data object is required for the upload");
     }
   },
 };

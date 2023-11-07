@@ -1,9 +1,10 @@
 const { google } = require("googleapis");
 const { getPropsFromFile } = require("./properties");
+const { DRIVE_API_VERSION } = require("../../constants/properties");
 
 module.exports = {
   updateFileParent: async ({ auth, fileId, newParentId }) => {
-    const driveService = google.drive({ version: "v3", auth });
+    const driveService = google.drive({ version: DRIVE_API_VERSION, auth });
 
     if (!fileId) {
       console.log(`The file ${fileId} does not exist.`);
@@ -35,6 +36,5 @@ module.exports = {
         console.log("Error uploading file, " + response.errors);
         break;
     }
-    return;
   },
 };
