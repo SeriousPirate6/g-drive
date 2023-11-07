@@ -5,10 +5,10 @@ const {
   closeConnection,
   createConnection,
   listRecordForAttribute,
+  updateData,
 } = require("./basics");
 const { encrypt, decrypt, fromHexToBytes } = require("../utils/string");
 const { Token } = require("../classes/token");
-const { authenticate } = require("../g-drive/default/authenticate");
 const {
   verifyCredentialsAndGetRemainingSpace,
 } = require("../g-drive/verify-json-credentials");
@@ -45,29 +45,32 @@ module.exports = {
       credentials
     );
 
-    if (remaining_space) {
-      const encryptedCredentials = encrypt(
-        credentials,
-        fromHexToBytes(process.env.ENC_SECRET_KEY)
+    if (!remaining_space) {
+      console.log("No space left on the provided credentials.");
+      return;
+    }
+
+    const encryptedCredentials = encrypt(
+      credentials,
+      fromHexToBytes(process.env.ENC_SECRET_KEY)
+    );
+
+    const token = new Token({
+      sha256,
+      credentials: encryptedCredentials,
+      available_space: remaining_space,
+    });
+
+    try {
+      const insertedData = await insertData(
+        db,
+        process.env.COLLECTION_TOKENS,
+        token
       );
 
-      const token = new Token({
-        sha256,
-        credentials: encryptedCredentials,
-        available_space: remaining_space,
-      });
-
-      try {
-        const insertedData = await insertData(
-          db,
-          process.env.COLLECTION_TOKENS,
-          token
-        );
-
-        return { insertedData };
-      } finally {
-        await closeConnection(client);
-      }
+      return { insertedData };
+    } finally {
+      await closeConnection(client);
     }
   },
 
@@ -80,10 +83,15 @@ module.exports = {
     const token = await listRecordForAttribute(
       db,
       process.env.COLLECTION_TOKENS,
-      { filters: [{ sha256: sha256 }], fields: "_id" }
+      { filters: [{ sha256: sha256 }], fields: ["_id", "available_space"] }
     );
 
-    return token.length > 0 ? token[0]._id.toString() : null;
+    return token.length > 0
+      ? {
+          tokenId: token[0]._id.toString(),
+          storedAvailableSpace: token[0].available_space,
+        }
+      : null;
   },
 
   getFirstTokenAvailable: async (fileSize = 0.01) => {
@@ -106,5 +114,14 @@ module.exports = {
     return decrypt(credentials, fromHexToBytes(process.env.ENC_SECRET_KEY));
   },
 
-  updateTokenAvailableSpace: async ({ objectId }) => {},
+  updateTokenAvailableSpace: async ({ objectId, available_space }) => {
+    const client = await createConnection();
+    const db = await getDB(client, process.env.DB_NAME);
+
+    await updateData(db, process.env.COLLECTION_TOKENS, objectId, {
+      available_space,
+    });
+
+    return true;
+  },
 };

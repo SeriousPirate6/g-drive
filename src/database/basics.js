@@ -5,6 +5,20 @@ createDB = async (client, db_name) => {
   return await client.db(db_name);
 };
 
+countObjectInCollection = async (db, cl) => {
+  if (!db) return 0;
+
+  const collection = db.collection(cl);
+
+  const count = await collection.countDocuments({});
+
+  if (count === 0) {
+    console.log(`The collection ${cl} is empty.`);
+  }
+
+  return count;
+};
+
 module.exports = {
   createConnection: async () => {
     try {
@@ -113,20 +127,6 @@ module.exports = {
     }
   },
 
-  countObjectInCollection: (countObjectInCollection = async (db, cl) => {
-    if (!db) return 0;
-
-    const collection = db.collection(cl);
-
-    const count = await collection.countDocuments({});
-
-    if (count === 0) {
-      console.log(`The collection ${cl} is empty.`);
-    }
-
-    return count;
-  }),
-
   getDocumentById: async (db, cl, id) => {
     try {
       const collection = db.collection(cl);
@@ -141,7 +141,7 @@ module.exports = {
         console.log("Document not found");
       }
     } catch (err) {
-      console.log("Error occured while extracting record:", err);
+      console.log("Error occurred while extracting record:", err);
     }
   },
 
@@ -183,7 +183,7 @@ module.exports = {
        *
        * { name: 1, email: 1, _id: 0 }
        *
-       * 1 means include
+       * 1 mean include
        * 0 means exclude
        */
 
@@ -191,7 +191,7 @@ module.exports = {
         if (!Array.isArray(fields)) fields = [fields];
 
         /*
-         * not a fancy way to get all the fields in a collection but it works
+         * not a fancy way to get all the fields in a collection, it works though
          */
         const collection_fields = await collection
           .aggregate([
@@ -206,13 +206,13 @@ module.exports = {
           /*
            * checking if field passed exists in the required collection
            */
-          const check_field_existance = collection_fields.fields.find(
+          const check_field_existence = collection_fields.fields.find(
             (present_field) => present_field === field
           );
           /*
            * adding the existing fields to the formattedFields object
            */
-          if (check_field_existance) {
+          if (check_field_existence) {
             formattedFields[field] = 1;
           } else {
             console.log(
@@ -228,12 +228,10 @@ module.exports = {
        */
       const query = filters ? { $and: formattedFilters } : {};
 
-      const document = await collection
+      return await collection
         .find(query, { projection: fields ? fields : {} })
         .limit(limit ? limit : 0)
         .toArray();
-
-      return document;
     } catch (e) {
       console.log(e);
     }
