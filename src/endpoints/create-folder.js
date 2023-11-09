@@ -5,29 +5,34 @@ const {
   sendInternalServerError,
   sendBadRequest,
 } = require("../responses/errors");
+const { checkJwtToken } = require("../authentication/middleware");
+
+const createFolderEndpoint = async (req, res) => {
+  const folder = req.body.folder;
+  if (folder) {
+    const folderName = folder.name;
+    const parentId = folder.parentId;
+
+    try {
+      const auth = await authenticate();
+
+      const folderId = await createFolder({ auth, folderName, parentId });
+
+      sendSuccessResponse(res, folderId);
+    } catch (error) {
+      console.log(error);
+      sendInternalServerError(res);
+    }
+  } else {
+    sendBadRequest(
+      res,
+      "The param 'folder' must be provided in the body request"
+    );
+  }
+};
 
 module.exports = {
-  createFolderEndpoint: async (req, res) => {
-    const folder = req.body.folder;
-    if (folder) {
-      const folderName = folder.name;
-      const parentId = folder.parentId;
-
-      try {
-        const auth = await authenticate();
-
-        const folderId = await createFolder({ auth, folderName, parentId });
-
-        sendSuccessResponse(res, folderId);
-      } catch (error) {
-        console.log(error);
-        sendInternalServerError(res);
-      }
-    } else {
-      sendBadRequest(
-        res,
-        "The param 'folder' must be provided in the body request"
-      );
-    }
+  createFolderEndpoint_authenticated: async (req, res) => {
+    await checkJwtToken(req, res, createFolderEndpoint);
   },
 };

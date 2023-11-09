@@ -14,75 +14,80 @@ const {
 } = require("../utils/files");
 const { TEMP_FOLDER } = require("../constants/properties");
 const { isJSON } = require("../utils/json");
+const { checkJwtToken } = require("../authentication/middleware");
 
-module.exports = {
-  uploadFileEndpoint: async (req, res) => {
-    /* using multer to handle form-data body request */
-    const data = req.files[0];
-    const metadata = req.body;
+const uploadFileEndpoint = async (req, res) => {
+  /* using multer to handle form-data body request */
+  const data = req.files[0];
+  const metadata = req.body;
 
-    if (data) {
-      /* fetching parameters from body file object */
-      const { description, parent, properties } = metadata;
+  if (data) {
+    /* fetching parameters from body file object */
+    const { description, parent, properties } = metadata;
 
-      /* converting string properties to actual JSON object */
-      const jsonProperties = isJSON(properties) ? JSON.parse(properties) : null;
+    /* converting string properties to actual JSON object */
+    const jsonProperties = isJSON(properties) ? JSON.parse(properties) : null;
 
-      /*
-       * if properties are defined and parsable to JSON, go on with the request
-       * otherwise send bad request response
-       */
-      if (properties !== undefined && properties !== null) {
-        /* downloading binary file */
-        const path = await downloadFromBinary({
-          name: data.originalname,
-          mimeType: data.mimetype,
-          buffer: data.buffer,
-        });
+    /*
+     * if properties are defined and parsable to JSON, go on with the request
+     * otherwise send bad request response
+     */
+    if (properties !== undefined && properties !== null) {
+      /* downloading binary file */
+      const path = await downloadFromBinary({
+        name: data.originalname,
+        mimeType: data.mimetype,
+        buffer: data.buffer,
+      });
 
-        /* proceeding only if the file has been downloaded properly */
-        if (path) {
-          try {
-            /* performing authentication */
-            const auth = await authenticate();
+      /* proceeding only if the file has been downloaded properly */
+      if (path) {
+        try {
+          /* performing authentication */
+          const auth = await authenticate();
 
-            /* uploading file */
-            const fileId = await uploadFile({
-              auth,
-              path,
-              description,
-              properties: jsonProperties,
-              parent,
-            });
+          /* uploading file */
+          const fileId = await uploadFile({
+            auth,
+            path,
+            description,
+            properties: jsonProperties,
+            parent,
+          });
 
-            /* updating the available space for the current set of credentials */
-            await updateCredentialsAvailableSpace({ auth });
+          /* updating the available space for the current set of credentials */
+          await updateCredentialsAvailableSpace({ auth });
 
-            /* deleting the temp folder and its content after the upload */
-            deleteFolderRecursively(TEMP_FOLDER);
+          /* deleting the temp folder and its content after the upload */
+          deleteFolderRecursively(TEMP_FOLDER);
 
-            /* sending successful response */
-            sendSuccessResponse(res, `File uploaded successfully`, { fileId });
-          } catch (error) {
-            console.log(error);
+          /* sending successful response */
+          sendSuccessResponse(res, `File uploaded successfully`, { fileId });
+        } catch (error) {
+          console.log(error);
 
-            /* deleting the temp folder and its content in case of failed upload */
-            deleteFolderRecursively(TEMP_FOLDER);
+          /* deleting the temp folder and its content in case of failed upload */
+          deleteFolderRecursively(TEMP_FOLDER);
 
-            /* sending internal server error response */
-            sendInternalServerError(res);
-          }
-        } else {
-          /* bad request response in case of file not convertible from binary */
-          sendBadRequest(res, "The file provided can't be read properly");
+          /* sending internal server error response */
+          sendInternalServerError(res);
         }
       } else {
-        /* bad request response in case of properties provided not in JSON format */
-        sendBadRequest(res, "The param 'properties' must be in JSON format");
+        /* bad request response in case of file not convertible from binary */
+        sendBadRequest(res, "The file provided can't be read properly");
       }
     } else {
-      /* bad request response in case of binary file not provided */
-      sendBadRequest(res, "The binary data object is required for the upload");
+      /* bad request response in case of properties provided not in JSON format */
+      sendBadRequest(res, "The param 'properties' must be in JSON format");
     }
+  } else {
+    /* bad request response in case of binary file not provided */
+    sendBadRequest(res, "The binary data object is required for the upload");
+  }
+};
+
+module.exports = {
+  uploadFileEndpoint_authenticated: async (req, res) => {
+    await checkJwtToken(req, res, uploadFileEndpoint());
   },
 };
