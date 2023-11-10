@@ -34,6 +34,6 @@ const deleteFileEndpoint = async (req, res) => {
 
 module.exports = {
   deleteFileEndpoint_authenticated: async (req, res) => {
-    await checkJwtToken(req, res, deleteFileEndpoint());
+    await checkJwtToken(req, res, deleteFileEndpoint);
   },
 };

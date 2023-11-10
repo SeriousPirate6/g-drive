@@ -21,6 +21,6 @@ const uploadEnvVarsEndpoint = async ({ res }) => {
 
 module.exports = {
   uploadEnvVarsEndpoint_authenticated: async (req, res) => {
-    await checkJwtToken(req, res, uploadEnvVarsEndpoint());
+    await checkJwtToken(req, res, uploadEnvVarsEndpoint);
   },
 };

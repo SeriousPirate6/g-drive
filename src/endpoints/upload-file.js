@@ -88,6 +88,6 @@ const uploadFileEndpoint = async (req, res) => {
 
 module.exports = {
   uploadFileEndpoint_authenticated: async (req, res) => {
-    await checkJwtToken(req, res, uploadFileEndpoint());
+    await checkJwtToken(req, res, uploadFileEndpoint);
   },
 };

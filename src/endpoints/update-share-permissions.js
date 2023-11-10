@@ -59,6 +59,6 @@ const updateSharePermissionsEndpoint = async (req, res) => {
 
 module.exports = {
   updateSharePermissionsEndpoint_authenticated: async (req, res) => {
-    await checkJwtToken(req, res, updateSharePermissionsEndpoint());
+    await checkJwtToken(req, res, updateSharePermissionsEndpoint);
   },
 };

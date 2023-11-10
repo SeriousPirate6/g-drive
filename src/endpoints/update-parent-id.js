@@ -28,6 +28,6 @@ const updateParentIdEndpoint = async (req, res) => {
 
 module.exports = {
   updateParentIdEndpoint_authenticated: async (req, res) => {
-    await checkJwtToken(req, res, updateParentIdEndpoint());
+    await checkJwtToken(req, res, updateParentIdEndpoint);
   },
 };
