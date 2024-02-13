@@ -1,11 +1,11 @@
-const { authenticate } = require("../g-drive/default/authenticate");
-const { createFolder } = require("../g-drive/default/create-folders");
-const { sendSuccessResponse } = require("../responses/success");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { createFolder } = require("../../g-drive/default/create-folders");
+const { sendSuccessResponse } = require("../../responses/success");
 const {
   sendInternalServerError,
   sendBadRequest,
-} = require("../responses/errors");
-const { checkJwtToken } = require("../authentication/middleware");
+} = require("../../responses/errors");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const createFolderEndpoint = async (req, res) => {
   const folder = req.body.folder;

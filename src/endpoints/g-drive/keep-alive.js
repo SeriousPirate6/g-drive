@@ -1,4 +1,4 @@
-const { sendSuccessResponse } = require("../responses/success");
+const { sendSuccessResponse } = require("../../responses/success");
 
 module.exports = {
   keepAlive: async ({ res }) => {

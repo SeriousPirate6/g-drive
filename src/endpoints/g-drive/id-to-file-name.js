@@ -1,8 +1,8 @@
-const { authenticate } = require("../g-drive/default/authenticate");
-const { idToName } = require("../g-drive/default/properties");
-const { sendBadRequest, sendNotFound } = require("../responses/errors");
-const { sendSuccessResponse } = require("../responses/success");
-const { checkJwtToken } = require("../authentication/middleware");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { idToName } = require("../../g-drive/default/properties");
+const { sendBadRequest, sendNotFound } = require("../../responses/errors");
+const { sendSuccessResponse } = require("../../responses/success");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const idToFileNameEndpoint = async (req, res) => {
   const { id: fileId } = req.params;

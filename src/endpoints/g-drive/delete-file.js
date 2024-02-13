@@ -1,8 +1,8 @@
-const { deleteItems } = require("../g-drive/default/delete");
-const { sendSuccessResponse } = require("../responses/success");
-const { authenticate } = require("../g-drive/default/authenticate");
-const { sendNotModifiedResponse } = require("../responses/no-changes");
-const { checkJwtToken } = require("../authentication/middleware");
+const { deleteItems } = require("../../g-drive/default/delete");
+const { sendSuccessResponse } = require("../../responses/success");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { sendNotModifiedResponse } = require("../../responses/no-changes");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const deleteFileEndpoint = async (req, res) => {
   const fileId = req.params.id;

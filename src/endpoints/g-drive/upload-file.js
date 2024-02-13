@@ -1,20 +1,20 @@
 const {
   sendBadRequest,
   sendInternalServerError,
-} = require("../responses/errors");
-const { uploadFile } = require("../g-drive/default/upload");
-const { authenticate } = require("../g-drive/default/authenticate");
-const { sendSuccessResponse } = require("../responses/success");
+} = require("../../responses/errors");
+const { uploadFile } = require("../../g-drive/default/upload");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { sendSuccessResponse } = require("../../responses/success");
 const {
   updateCredentialsAvailableSpace,
-} = require("../g-drive/update-credentials-available-space");
+} = require("../../g-drive/update-credentials-available-space");
 const {
   downloadFromBinary,
   deleteFolderRecursively,
-} = require("../utils/files");
-const { TEMP_FOLDER } = require("../constants/properties");
-const { isJSON } = require("../utils/json");
-const { checkJwtToken } = require("../authentication/middleware");
+} = require("../../utils/files");
+const { TEMP_FOLDER } = require("../../constants/properties");
+const { isJSON } = require("../../utils/json");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const uploadFileEndpoint = async (req, res) => {
   /* using multer to handle form-data body request */

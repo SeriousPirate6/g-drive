@@ -1,10 +1,10 @@
-const { encryptAndInsertToken } = require("../database/tokens");
+const { encryptAndInsertToken } = require("../../database/tokens");
 const {
   sendBadRequest,
   sendInternalServerError,
-} = require("../responses/errors");
-const { sendSuccessResponse } = require("../responses/success");
-const { checkJwtToken } = require("../authentication/middleware");
+} = require("../../responses/errors");
+const { sendSuccessResponse } = require("../../responses/success");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const addNewCredentialsEndpoint = async (req, res) => {
   const { credentials } = req.body;

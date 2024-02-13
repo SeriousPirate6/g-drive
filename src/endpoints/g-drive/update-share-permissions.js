@@ -1,17 +1,17 @@
-const { authenticate } = require("../g-drive/default/authenticate");
-const { sendSuccessResponse } = require("../responses/success");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { sendSuccessResponse } = require("../../responses/success");
 const {
   sendInternalServerError,
   sendBadRequest,
-} = require("../responses/errors");
-const { GRANT, REVOKE } = require("../constants/properties");
+} = require("../../responses/errors");
+const { GRANT, REVOKE } = require("../../constants/properties");
 const {
   shareFile,
   revokeSharePermission,
-} = require("../g-drive/default/share-revoke-access");
-const { getPropsFromFile } = require("../g-drive/default/properties");
-const { constructDriveUrl } = require("../g-drive/construct-url");
-const { checkJwtToken } = require("../authentication/middleware");
+} = require("../../g-drive/default/share-revoke-access");
+const { getPropsFromFile } = require("../../g-drive/default/properties");
+const { constructDriveUrl } = require("../../g-drive/construct-url");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const updateSharePermissionsEndpoint = async (req, res) => {
   const fileId = req.params.id;

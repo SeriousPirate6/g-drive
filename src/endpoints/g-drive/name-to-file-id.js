@@ -1,9 +1,9 @@
 const {
   nameToFileId,
   nameToFolderId,
-} = require("../g-drive/default/properties");
-const { authenticate } = require("../g-drive/default/authenticate");
-const { checkJwtToken } = require("../authentication/middleware");
+} = require("../../g-drive/default/properties");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const nameToFileIdEndpoint = async (req, res) => {
   try {

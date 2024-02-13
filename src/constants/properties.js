@@ -2,6 +2,8 @@ module.exports = Object.freeze({
   /* default drive api version */
   DRIVE_API_VERSION: "v3",
 
+  DEFAULT_MEDIA_NAME: "media",
+
   /* local folders */
   TEMP_FOLDER: "temp",
 

@@ -1,11 +1,11 @@
-const { authenticate } = require("../g-drive/default/authenticate");
-const { sendSuccessResponse } = require("../responses/success");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { sendSuccessResponse } = require("../../responses/success");
 const {
   sendBadRequest,
   sendInternalServerError,
-} = require("../responses/errors");
-const { updateFileParent } = require("../g-drive/default/update-parent");
-const { checkJwtToken } = require("../authentication/middleware");
+} = require("../../responses/errors");
+const { updateFileParent } = require("../../g-drive/default/update-parent");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const updateParentIdEndpoint = async (req, res) => {
   const { fileId, newParentId } = req.body;

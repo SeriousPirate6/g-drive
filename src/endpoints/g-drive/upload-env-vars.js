@@ -1,6 +1,6 @@
-const { exportEnvVars } = require("../env/export-env-vars");
-const { pushEnvVarsToRender } = require("../env/push-env-vars-to-render");
-const { checkJwtToken } = require("../authentication/middleware");
+const { exportEnvVars } = require("../../env/export-env-vars");
+const { pushEnvVarsToRender } = require("../../env/push-env-vars-to-render");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const uploadEnvVarsEndpoint = async ({ res }) => {
   try {

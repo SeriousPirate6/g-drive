@@ -1,11 +1,11 @@
-const { authenticate } = require("../g-drive/default/authenticate");
-const { QUERY_ONLY_FOLDERS } = require("../constants/filters");
-const { sendSuccessResponse } = require("../responses/success");
-const { sendInternalServerError } = require("../responses/errors");
+const { authenticate } = require("../../g-drive/default/authenticate");
+const { QUERY_ONLY_FOLDERS } = require("../../constants/filters");
+const { sendSuccessResponse } = require("../../responses/success");
+const { sendInternalServerError } = require("../../responses/errors");
 const {
   getFilesInFoldersAndSubFolderRecursively,
-} = require("../g-drive/get-files-recursively");
-const { checkJwtToken } = require("../authentication/middleware");
+} = require("../../g-drive/get-files-recursively");
+const { checkJwtToken } = require("../../authentication/middleware");
 
 const listAllFilesEndpoint = async ({ res }) => {
   try {
